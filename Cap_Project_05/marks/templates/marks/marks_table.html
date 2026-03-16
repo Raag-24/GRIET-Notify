@@ -1,0 +1,1461 @@
+<!--final:-
+
+{% load custom_filters %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Marks Table</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: white;
+      padding: 0;
+    }
+
+    /* Header styles from marks_form.html */
+    .logos {
+      position: absolute;
+      margin-top: -10px;
+      top: 10px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 40px;
+      z-index: 3;
+      background-color: rgb(241, 178, 241);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .institute-name {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-top: -5px;
+    }
+
+    .institute-name .main-title {
+      color: #c41e3a;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 2.5px;
+      word-spacing: 4px;
+    }
+
+    .institute-name .sub-title {
+      color: #333;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: normal;
+    }
+
+    .griet, .aac {
+      width: 80px;
+      height: auto;
+    }
+
+    /* Navigation bar */
+    .nav-bar-below-header {
+      position: relative;
+      left: 0;
+      right: 0;
+      top: 100px;
+      width: 100%;
+      margin: 0 auto 40px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      padding: 0 32px;
+      box-sizing: border-box;
+      z-index: 1100;
+      background: none;
+    }
+
+    .nav-link {
+      color: #2563eb;
+      text-decoration: underline;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: #b164b6;
+      text-decoration: underline;
+    }
+
+    .purple-bg-link {
+      background: #b164b6;
+      color: #fff !important;
+      border-radius: 0 0 22px 22px;
+      padding: 8px 32px 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(177, 100, 182, 0.10);
+      font-weight: 600;
+      font-size: 28px;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+      margin-top: 0;
+    }
+
+    .purple-bg-link:hover {
+      background: #c975ce;
+      color: #fff !important;
+    }
+
+    /* Main content */
+    .main-content {
+      margin-top: 180px;
+      padding: 20px;
+      background-color: #f7f9fc;
+    }
+
+    h1 {
+      margin: 20px;
+      text-align: center;
+    }
+
+    h1 .exam-type {
+      color: #2563eb;
+      font-weight: bold;
+      background: #e6eefe;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    h1 .table-text {
+      font-weight: bold;
+      color: #111;
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-family: 'Segoe UI', sans-serif;
+      margin-top: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    thead {
+      background-color: #f1f3f4;
+      font-weight: bold;
+    }
+
+    thead th {
+      padding: 14px 16px;
+      text-align: left;
+      color: #333;
+      font-size: 14px;
+      border-bottom: 1px solid #ddd;
+      border-right: none;
+    }
+
+    thead th:first-child {
+      text-align: center;
+      width: 100px;
+    }
+
+    tbody td {
+      padding: 14px 16px;
+      font-size: 14px;
+      color: #444;
+      border-bottom: 1px solid #eee;
+      border-right: none;
+    }
+
+    tbody td:first-child {
+      text-align: center;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+
+    tbody tr:hover {
+      background-color: #f0f8ff;
+      transition: background 0.3s ease;
+    }
+
+    /* SMS Status Styles */
+    .sms-status {
+      font-size: 16px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .status-success {
+      color: #28a745;
+    }
+
+    .status-failed {
+      color: #dc3545;
+    }
+
+    .status-pending {
+      color: #ffc107;
+    }
+
+    /* Row highlighting for SMS status */
+    .row-success {
+      background-color: #d4edda !important;
+      border-left: 4px solid #28a745;
+    }
+
+    .row-failed {
+      background-color: #f8d7da !important;
+      border-left: 4px solid #dc3545;
+    }
+
+    .row-pending {
+      background-color: #fff3cd !important;
+      border-left: 4px solid #ffc107;
+    }
+
+    .no-data {
+      text-align: center;
+      color: #888;
+      font-size: 16px;
+      font-style: italic;
+      margin-top: 40px;
+    }
+
+    /* Button styles */
+    .btn-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .send-btn {
+      padding: 10px 40px;
+      background-color: #b164b6;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(177, 100, 182, 0.4),
+                 0 2px 8px rgba(177, 100, 182, 0.2);
+      position: relative;
+      overflow: hidden;
+      z-index: 9999;
+    }
+
+    .send-btn:hover {
+      background-color: #c975ce;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(177, 100, 182, 0.5),
+                 0 4px 12px rgba(177, 100, 182, 0.3);
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .send-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
+    /* Loading spinner */
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #ffffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Alert styles */
+    .alert {
+      padding: 15px;
+      margin: 20px auto;
+      max-width: 600px;
+      border-radius: 8px;
+      display: none;
+      text-align: center;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Message format box */
+    .result-message-box {
+      margin: 24px auto 100px auto;
+      max-width: 600px;
+      background: #fff;
+      border: 2px solid #b164b6;
+      border-radius: 12px;
+      padding: 22px 28px 18px 28px;
+      font-size: 18px;
+      color: #333;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(177, 100, 182, 0.10);
+    }
+
+    .result-message-box .msg-heading {
+      font-size: 20px;
+      font-weight: bold;
+      color: #b164b6;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    /* Bottom waves */
+    .wave-bottom-back {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 420px;
+      z-index: -1;
+      transform: translateY(-2px);
+    }
+
+    .wave-bottom-front {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 320px;
+      z-index: -1;
+    }
+
+    .download-btn {
+  background-color: #4CAF50; /* green */
+  color: white;
+  padding: 10px 20px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.download-btn:hover {
+  background-color: #45a049;
+}
+
+.action-btn {
+  padding: 10px 20px;
+  margin: 5px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        font-size: 13px;
+      }
+
+      .logos {
+        padding: 5px 20px;
+      }
+
+      .institute-name .main-title {
+        font-size: 18px;
+      }
+
+      .griet, .aac {
+        width: 60px;
+      }
+
+      .sms-status {
+        font-size: 14px;
+      }
+
+      .nav-bar-below-header {
+        padding: 0 16px;
+      }
+
+      .purple-bg-link {
+        font-size: 24px;
+        padding: 6px 24px 10px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  //Header from marks_form.html
+  <div class="logos">
+    <div class="logo-section">
+      <img class="griet" src="{% static 'GRIET.PNG' %}" alt="GRIET Logo">
+      <div class="institute-name">
+        <span class="main-title">GOKARAJU RANGARAJU</span>
+        <span class="sub-title">INSTITUTE OF ENGINEERING AND TECHNOLOGY</span>
+      </div>
+    </div>
+    <img class="aac" src="{% static 'AAC.PNG' %}" alt="AAC Logo">
+  </div>
+
+  <div class="main-content">
+
+    <h1>
+      <span class="exam-type">{{ exam_type_name }}</span>
+      <span class="table-text">Results</span>
+    </h1>
+
+    //Alert Messages
+    <div id="alertSuccess" class="alert alert-success"></div>
+    <div id="alertError" class="alert alert-error"></div>
+
+    {% if rows %}
+      <table id="marksTable">
+        <thead>
+          <tr>
+            <th style="display: flex; align-items: center; gap: 6px; justify-content: center;">
+              <input type="checkbox" id="selectAll">
+              <span>Select All</span>
+            </th>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Phone Number</th>
+            {% for subject in subjects %}
+              <th>{{ subject }}</th>
+            {% endfor %}
+            <th>SMS Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr data-student-id="{{ row.student_id }}" data-student-name="{{ row.student_name }}" data-phone="{{ row.phone_number }}">
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td>{{ row.student_id }}</td>
+              <td>
+                {{ row.student_name }}
+              </td>
+              <td>{{ row.phone_number }}</td>
+              {% for subject in subjects %}
+                <td data-subject="{{ subject }}">{{ row|get_item:subject }}</td>
+              {% endfor %}
+              <td class="status-cell" id="cell-{{ row.student_id }}">-</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="btn-container">
+        <button class="send-btn action-btn" id="sendSmsBtn">
+          Send Message
+          <span class="loading-spinner" id="loadingSpinner"></span>
+        </button>
+
+        <button type="button" class="download-btn action-btn" onclick="downloadTableAsCSV()">Download as CSV</button>
+      </div>
+
+    {% else %}
+      <p class="no-data"><strong>No Students Found</strong></p>
+    {% endif %}
+
+    //Message format box
+    <div class="result-message-box">
+      <div class="msg-heading">Message Format</div>
+      Hello &lt;name&gt;, your results for &lt;exam&gt; are: &lt;Subject1&gt;: &lt;score1&gt;, &lt;Subject2&gt;: &lt;score2&gt;, &lt;Subject3&gt;: &lt;score3&gt;.
+    </div>
+
+  </div>
+
+  //Bottom waves
+  <svg class="wave-bottom-back" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="#d69cd9" d="M0,224L80,202.7C160,181,320,139,480,149.3C640,160,800,224,960,234.7C1120,245,1280,203,1360,181.3L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+  </svg>
+
+  <svg class="wave-bottom-front" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="#d3d3d3" d="M0,260L80,245C160,230,320,200,480,190C640,180,800,190,960,200C1120,210,1280,160,1360,135L1440,110L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+  </svg>
+
+  <script>
+    // Store exam type name for SMS
+    const examTypeName = "{{ exam_type_name }}";
+    
+    // Select/Deselect All Checkbox
+    document.getElementById("selectAll")?.addEventListener("change", function () {
+      const checkboxes = document.querySelectorAll(".row-checkbox");
+      checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // Send SMS functionality
+    document.getElementById("sendSmsBtn")?.addEventListener("click", function() {
+      const selectedCheckboxes = document.querySelectorAll(".row-checkbox:checked");
+      
+      if (selectedCheckboxes.length === 0) {
+        showAlert("Please select at least one student to send SMS.", "error");
+        return;
+      }
+
+      // Disable button and show loading
+      this.disabled = true;
+      document.getElementById("loadingSpinner").style.display = "inline-block";
+      
+      // Clear previous status
+      clearAllStatus();
+      
+      // Collect selected student data
+      const selectedStudents = [];
+      selectedCheckboxes.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        const studentId = row.dataset.studentId;
+        const studentName = row.dataset.studentName;
+        const phoneNumber = row.dataset.phone;
+        
+        // Collect marks for this student
+        const marks = {};
+        const marksCells = row.querySelectorAll('td[data-subject]');
+        marksCells.forEach(cell => {
+          const subject = cell.dataset.subject;
+          const score = cell.textContent.trim();
+          marks[subject] = score;
+        });
+        
+        selectedStudents.push({
+          student_id: studentId,
+          student_name: studentName,
+          phone_number: phoneNumber,
+          marks: marks
+        });
+        
+        // Set pending status
+        updateStudentStatus(studentId, 'pending', '⏳ Sending...');
+      });
+
+      // Send AJAX request
+      fetch('/send_sms/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+          students: selectedStudents,
+          exam_type: examTypeName
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Update status for each student
+          data.results.forEach(result => {
+            if (result.status === 'success') {
+              updateStudentStatus(result.student_id, 'success', '✅ Sent');
+            } else {
+              updateStudentStatus(result.student_id, 'failed', '❌ Failed');
+              console.error(`SMS failed for ${result.student_name}: ${result.message}`);
+            }
+          });
+          
+          const successCount = data.results.filter(r => r.status === 'success').length;
+          const failedCount = data.results.filter(r => r.status === 'failed').length;
+          
+          showAlert(`SMS Results: ${successCount} sent successfully, ${failedCount} failed.`, 
+                   failedCount === 0 ? "success" : "error");
+        } else {
+          showAlert(`Error: ${data.error}`, "error");
+          clearAllStatus();
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert("An error occurred while sending SMS. Please try again.", "error");
+        clearAllStatus();
+      })
+      .finally(() => {
+        // Re-enable button and hide loading
+        this.disabled = false;
+        document.getElementById("loadingSpinner").style.display = "none";
+      });
+    });
+
+    // Helper functions
+    function updateStudentStatus(studentId, status, text) {
+      const statusCell = document.getElementById(`cell-${studentId}`);
+      const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
+      
+      if (statusCell) {
+        statusCell.textContent = text;
+        statusCell.className = `status-cell status-${status}`;
+      }
+      
+      if (row) {
+        // Remove existing status classes
+        row.classList.remove('row-success', 'row-failed', 'row-pending');
+        // Add new status class
+        row.classList.add(`row-${status}`);
+      }
+    }
+
+    function clearAllStatus() {
+      document.querySelectorAll('.status-cell').forEach(el => {
+        el.textContent = '-';
+        el.className = 'status-cell';
+      });
+      
+      document.querySelectorAll('tbody tr').forEach(row => {
+        row.classList.remove('row-success', 'row-failed', 'row-pending');
+      });
+    }
+
+    function showAlert(message, type) {
+      const alertElement = type === "success" ? 
+        document.getElementById("alertSuccess") : 
+        document.getElementById("alertError");
+      
+      alertElement.textContent = message;
+      alertElement.style.display = "block";
+      
+      // Hide after 5 seconds
+      setTimeout(() => {
+        alertElement.style.display = "none";
+      }, 5000);
+    }
+
+    function downloadTableAsCSV() {
+  const table = document.getElementById("marksTable");
+  if (!table) {
+    alert("Table not found!");
+    return;
+  }
+
+  const rows = Array.from(table.querySelectorAll("tr"));
+  const csv = rows.map(row => {
+    const cols = Array.from(row.querySelectorAll("th, td"))
+      .filter(col => !col.querySelector("input[type='checkbox']")) // Skip checkbox columns
+      .map(col => `"${col.innerText.replace(/\n/g, " ").replace(/"/g, '""')}"`);
+    return cols.join(",");
+  }).join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.setAttribute("hidden", "");
+  a.setAttribute("href", url);
+  a.setAttribute("download", "student_data.csv");
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  </script>
+
+</body>
+</html>
+-->
+<!--{% load custom_filters %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Marks Table</title>
+
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: white;
+    overflow: hidden; /* prevent whole-page scroll */
+  }
+
+  /* HEADER */
+  .logos {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 40px;
+    z-index: 3;
+    background-color: rgb(241, 178, 241);
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .institute-name {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: -5px;
+  }
+
+  .institute-name .main-title {
+    color: #c41e3a;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 2.5px;
+    word-spacing: 4px;
+  }
+
+  .institute-name .sub-title {
+    color: #333;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .griet, .aac {
+    width: 80px;
+    height: auto;
+  }
+
+  /* MAIN WRAPPER */
+  .main-shell {
+    position: absolute;
+    top: 80px;  /* space for header */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: #f7f9fc;
+  }
+
+  h1 {
+    margin: 20px;
+    text-align: center;
+  }
+
+  h1 .exam-type {
+    color: #2563eb;
+    font-weight: bold;
+    background: #e6eefe;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  h1 .table-text {
+    font-weight: bold;
+    color: #111;
+  }
+
+  /* TABLE WRAPPER (scrolls only table) */
+  .table-wrapper {
+    flex: 1;
+    overflow: auto;
+    padding: 0 20px 40px 20px;
+  }
+
+  table {
+    width: max(100%, 1100px);
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: 'Segoe UI', sans-serif;
+    margin-top: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+  }
+
+  thead {
+    background-color: #f1f3f4;
+    font-weight: bold;
+  }
+
+  thead th {
+    padding: 14px 16px;
+    text-align: left;
+    color: #333;
+    font-size: 14px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .th-flex {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  thead th:first-child {
+    text-align: center;
+    width: 100px;
+  }
+
+  tbody td {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #444;
+    border-bottom: 1px solid #eee;
+  }
+
+  tbody td:first-child {
+    text-align: center;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #fafafa;
+  }
+
+  tbody tr:hover {
+    background-color: #f0f8ff;
+    transition: background 0.3s ease;
+  }
+
+  /* Status Colors */
+  .sms-status { font-size: 16px; font-weight: bold; margin-left: 10px; }
+  .status-success { color: #28a745; }
+  .status-failed { color: #dc3545; }
+  .status-pending { color: #ffc107; }
+
+  .row-success { background-color: #d4edda !important; border-left: 4px solid #28a745; }
+  .row-failed { background-color: #f8d7da !important; border-left: 4px solid #dc3545; }
+  .row-pending { background-color: #fff3cd !important; border-left: 4px solid #ffc107; }
+
+  .no-data {
+    text-align: center;
+    color: #888;
+    font-size: 16px;
+    font-style: italic;
+    margin-top: 40px;
+  }
+
+  /* Buttons */
+  .btn-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .send-btn {
+    padding: 10px 40px;
+    background-color: #b164b6;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(177, 100, 182, 0.4),
+                0 2px 8px rgba(177, 100, 182, 0.2);
+  }
+
+  .send-btn:hover {
+    background-color: #c975ce;
+    transform: translateY(-2px);
+  }
+
+  .download-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .download-btn:hover { background-color: #45a049; }
+
+  input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+  }
+
+  /* Message Box */
+  .result-message-box {
+    margin: 24px auto 40px auto;
+    max-width: 600px;
+    background: #fff;
+    border: 2px solid #b164b6;
+    border-radius: 12px;
+    padding: 22px 28px 18px 28px;
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(177, 100, 182, 0.10);
+  }
+
+  .result-message-box .msg-heading {
+    font-size: 20px;
+    font-weight: bold;
+    color: #b164b6;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+
+  /* Waves */
+  .wave-bottom-back, .wave-bottom-front {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+  }
+
+  @media (max-width: 768px) {
+    table, thead, tbody, th, td, tr { font-size: 13px; }
+    .logos { padding: 5px 20px; }
+    .institute-name .main-title { font-size: 18px; }
+    .griet, .aac { width: 60px; }
+    .purple-bg-link { font-size: 24px; }
+  }
+</style>
+</head>
+
+<body>
+  /*HEADER*/
+  <div class="logos">
+    <div class="logo-section">
+      <img class="griet" src="{% static 'GRIET.PNG' %}" alt="GRIET Logo">
+      <div class="institute-name">
+        <span class="main-title">GOKARAJU RANGARAJU</span>
+        <span class="sub-title">INSTITUTE OF ENGINEERING AND TECHNOLOGY</span>
+      </div>
+    </div>
+    <img class="aac" src="{% static 'AAC.PNG' %}" alt="AAC Logo">
+  </div>
+
+  /*MAIN AREA*/
+  <div class="main-shell">
+    <h1>
+      <span class="exam-type">{{ exam_type_name }}</span>
+      <span class="table-text">Results</span>
+    </h1>
+
+    <div class="table-wrapper">
+      {% if rows %}
+      <table id="marksTable">
+        <thead>
+          <tr>
+            <th><div class="th-flex"><input type="checkbox" id="selectAll"><span>Select All</span></div></th>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Phone Number</th>
+            {% for subject in subjects %}
+              <th>{{ subject }}</th>
+            {% endfor %}
+            <th>SMS Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr data-student-id="{{ row.student_id }}" data-student-name="{{ row.student_name }}" data-phone="{{ row.phone_number }}">
+            <td><input type="checkbox" class="row-checkbox"></td>
+            <td>{{ row.student_id }}</td>
+            <td>{{ row.student_name }}</td>
+            <td>{{ row.phone_number }}</td>
+            {% for subject in subjects %}
+              <td data-subject="{{ subject }}">{{ row|get_item:subject }}</td>
+            {% endfor %}
+            <td class="status-cell" id="cell-{{ row.student_id }}">-</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="btn-container">
+        <button class="send-btn" id="sendSmsBtn">
+          Send Message
+          <span class="loading-spinner" id="loadingSpinner"></span>
+        </button>
+        <button type="button" class="download-btn" onclick="downloadTableAsCSV()">Download as CSV</button>
+      </div>
+
+      {% else %}
+        <p class="no-data"><strong>No Students Found</strong></p>
+      {% endif %}
+
+      <div class="result-message-box">
+        <div class="msg-heading">Message Format</div>
+        Hello &lt;name&gt;, your results for &lt;exam&gt; are: &lt;Subject1&gt;: &lt;score1&gt;, &lt;Subject2&gt;: &lt;score2&gt;, &lt;Subject3&gt;: &lt;score3&gt;.
+      </div>
+    </div>
+  </div>
+
+  /*WAVES*/
+  <svg class="wave-bottom-back" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="#d69cd9" d="M0,224L80,202.7C160,181,320,139,480,149.3C640,160,800,224,960,234.7C1120,245,1280,203,1360,181.3L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+  </svg>
+  <svg class="wave-bottom-front" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="#d3d3d3" d="M0,260L80,245C160,230,320,200,480,190C640,180,800,190,960,200C1120,210,1280,160,1360,135L1440,110L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+  </svg>
+</body>
+</html>
+-->
+
+{% load custom_filters %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Marks Table</title>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: white;
+    overflow: hidden; /* lock page; only table area scrolls */
+  }
+
+  /* ===== HEADER (fixed) ===== */
+  .logos {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 40px;
+    z-index: 3;
+    background-color: rgb(241, 178, 241);
+  }
+
+  .logo-section { display: flex; align-items: center; gap: 20px; }
+  .institute-name { display: flex; flex-direction: column; gap: 3px; margin-top: -5px; }
+  .institute-name .main-title { color: #c41e3a; font-size: 20px; font-weight: bold; letter-spacing: 2.5px; word-spacing: 4px; }
+  .institute-name .sub-title { color: #333; font-size: 12px; font-weight: 500; }
+  .griet, .aac { width: 80px; height: auto; }
+
+  /* ===== LAYOUT: fixed header + fixed controls; table scrolls in the middle ===== */
+  .main-shell {
+    position: absolute;
+    top: 80px;  /* header height */
+    left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: tranparent;
+    z-index: 1;
+  }
+
+  /* Title/alerts (fixed) */
+  .page-head { padding: 12px 20px 0 20px; }
+  h1 { margin: 20px; text-align: center; }
+  h1 .exam-type { color: #2563eb; font-weight: bold; background: #e6eefe; padding: 2px 8px; border-radius: 6px; }
+  h1 .table-text { font-weight: bold; color: #111; }
+
+  /* ===== SCROLL AREA (only table) ===== */
+  .table-wrapper {
+    flex: 1;                /* takes remaining height between page-head and controls-panel */
+    overflow: auto;         /* vertical + horizontal scrollbars appear here */
+    padding: 0 20px 10px 20px;
+  }
+
+  /* Table styles (unchanged except width rules to force bottom scrollbar when wide) */
+  table {
+    width: max(100%, 1100px);  /* allow horizontal overflow when many columns */
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: 'Segoe UI', sans-serif;
+    margin-top: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+  }
+  thead { background-color: #f1f3f4; font-weight: bold; }
+  thead th { padding: 14px 16px; text-align: left; color: #333; font-size: 14px; border-bottom: 1px solid #ddd; }
+  thead th:first-child { text-align: center; width: 100px; }
+
+  /* keep <th> as table-cell; use a wrapper for flex alignment */
+  .th-flex { display: flex; align-items: center; gap: 6px; justify-content: center; }
+
+  tbody td { padding: 14px 16px; font-size: 14px; color: #444; border-bottom: 1px solid #eee; }
+  tbody td:first-child { text-align: center; }
+  tbody tr:nth-child(even) { background-color: #fafafa; }
+  tbody tr:hover { background-color: #f0f8ff; transition: background 0.3s ease; }
+
+  /* SMS Status + row highlights */
+  .sms-status { font-size: 16px; font-weight: bold; margin-left: 10px; }
+  .status-success { color: #28a745; }
+  .status-failed  { color: #dc3545; }
+  .status-pending { color: #ffc107; }
+  .row-success { background-color: #d4edda !important; border-left: 4px solid #28a745; }
+  .row-failed  { background-color: #f8d7da !important; border-left: 4px solid #dc3545; }
+  .row-pending { background-color: #fff3cd !important; border-left: 4px solid #ffc107; }
+
+  .no-data { text-align: center; color: #888; font-size: 16px; font-style: italic; margin-top: 40px; }
+
+  input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
+
+  /* ===== CONTROLS (fixed, non-scrolling) ===== */
+  .controls-panel {
+    padding: 10px 20px 16px 20px;
+    background: transparent;     /* waves show behind; panel stays fixed inside shell */
+    z-index: 2;
+  }
+
+  .btn-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .send-btn {
+    padding: 10px 40px;
+    background-color: #b164b6;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(177, 100, 182, 0.4), 0 2px 8px rgba(177, 100, 182, 0.2);
+  }
+  .send-btn:hover { background-color: #c975ce; transform: translateY(-2px); }
+  .send-btn:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .download-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .download-btn:hover { background-color: #45a049; }
+
+  /* Message format box (fixed with controls) */
+  .result-message-box {
+    margin: 16px auto 8px auto;
+    max-width: 600px;
+    background: #fff;
+    border: 2px solid #b164b6;
+    border-radius: 12px;
+    padding: 22px 28px 18px 28px;
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(177, 100, 182, 0.10);
+  }
+  .result-message-box .msg-heading {
+    font-size: 20px; font-weight: bold; color: #b164b6; margin-bottom: 12px; letter-spacing: 1px;
+  }
+
+  /* Alerts (can show under title) */
+  .alert {
+    padding: 15px; margin: 10px auto 0 auto; max-width: 600px;
+    border-radius: 8px; display: none; text-align: center;
+  }
+  .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .alert-error   { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+  /* Waves stay fixed behind everything */
+  .wave-bottom-back, .wave-bottom-front {
+    position: fixed; bottom: 0; left: 0; width: 100%; z-index: 0; pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    table, thead, tbody, th, td, tr { font-size: 13px; }
+    .logos { padding: 5px 20px; }
+    .institute-name .main-title { font-size: 18px; }
+    .griet, .aac { width: 60px; }
+  }
+</style>
+</head>
+
+<body>
+  <!-- ===== HEADER (fixed) ===== -->
+  <div class="logos">
+    <div class="logo-section">
+      <img class="griet" src="{% static 'GRIET.PNG' %}" alt="GRIET Logo">
+      <div class="institute-name">
+        <span class="main-title">GOKARAJU RANGARAJU</span>
+        <span class="sub-title">INSTITUTE OF ENGINEERING AND TECHNOLOGY</span>
+      </div>
+    </div>
+    <img class="aac" src="{% static 'AAC.PNG' %}" alt="AAC Logo">
+  </div>
+
+  <!-- ===== MAIN AREA ===== -->
+  <div class="main-shell">
+    <!-- Title + Alerts (fixed) -->
+    <div class="page-head">
+      <h1>
+        <span class="exam-type">{{ exam_type_name }}</span>
+        <span class="table-text">Results</span>
+      </h1>
+      <div id="alertSuccess" class="alert alert-success"></div>
+      <div id="alertError"   class="alert alert-error"></div>
+    </div>
+
+    <!-- Only this area scrolls -->
+    <div class="table-wrapper">
+      {% if rows %}
+        <table id="marksTable">
+          <thead>
+            <tr>
+              <th>
+                <div class="th-flex">
+                  <input type="checkbox" id="selectAll">
+                  <span>Select All</span>
+                </div>
+              </th>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Phone Number</th>
+              {% for subject in subjects %}
+                <th>{{ subject }}</th>
+              {% endfor %}
+              <th>SMS Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+            <tr data-student-id="{{ row.student_id }}" data-student-name="{{ row.student_name }}" data-phone="{{ row.phone_number }}">
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td>{{ row.student_id }}</td>
+              <td>{{ row.student_name }}</td>
+              <td>{{ row.phone_number }}</td>
+              {% for subject in subjects %}
+                <td data-subject="{{ subject }}">{{ row|get_item:subject }}</td>
+              {% endfor %}
+              <td class="status-cell" id="cell-{{ row.student_id }}">-</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="no-data"><strong>No Students Found</strong></p>
+      {% endif %}
+    </div>
+
+    <!-- Controls + Message format (fixed) -->
+    <div class="controls-panel">
+      {% if rows %}
+      <div class="btn-container">
+        <button class="send-btn action-btn" id="sendSmsBtn">
+          Send Message
+          <span class="loading-spinner" id="loadingSpinner" style="display:none;width:20px;height:20px;border:2px solid #f3f3f3;border-top:2px solid #ffffff;border-radius:50%;animation:spin 1s linear infinite;margin-left:10px;"></span>
+        </button>
+        <button type="button" class="download-btn action-btn" onclick="downloadTableAsCSV()">Download as CSV</button>
+      </div>
+      {% endif %}
+
+      <div class="result-message-box">
+        <div class="msg-heading">Message Format</div>
+        Hello &lt;name&gt;, your results for &lt;exam&gt; are: &lt;Subject1&gt;: &lt;score1&gt;, &lt;Subject2&gt;: &lt;score2&gt;, &lt;Subject3&gt;: &lt;score3&gt;.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WAVES (fixed in background) ===== -->
+  <svg class="wave-bottom-back" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="#d69cd9" d="M0,224L80,202.7C160,181,320,139,480,149.3C640,160,800,224,960,234.7C1120,245,1280,203,1360,181.3L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+  </svg>
+  <svg class="wave-bottom-front" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="#d3d3d3" d="M0,260L80,245C160,230,320,200,480,190C640,180,800,190,960,200C1120,210,1280,160,1360,135L1440,110L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+  </svg>
+
+  <!-- ===== JS (kept intact; only tiny spinner style inlined above) ===== -->
+  <script>
+    // Store exam type name for SMS
+    const examTypeName = "{{ exam_type_name }}";
+
+    // Select/Deselect All Checkbox
+    document.getElementById("selectAll")?.addEventListener("change", function () {
+      const checkboxes = document.querySelectorAll(".row-checkbox");
+      checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // Send SMS functionality
+    document.getElementById("sendSmsBtn")?.addEventListener("click", function() {
+      const selectedCheckboxes = document.querySelectorAll(".row-checkbox:checked");
+      if (selectedCheckboxes.length === 0) {
+        showAlert("Please select at least one student to send SMS.", "error");
+        return;
+      }
+
+      // Disable button and show loading
+      this.disabled = true;
+      document.getElementById("loadingSpinner").style.display = "inline-block";
+
+      // Clear previous status
+      clearAllStatus();
+
+      // Collect selected student data
+      const selectedStudents = [];
+      selectedCheckboxes.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        const studentId = row.dataset.studentId;
+        const studentName = row.dataset.studentName;
+        const phoneNumber = row.dataset.phone;
+
+        const marks = {};
+        const marksCells = row.querySelectorAll('td[data-subject]');
+        marksCells.forEach(cell => {
+          const subject = cell.dataset.subject;
+          const score = cell.textContent.trim();
+          marks[subject] = score;
+        });
+
+        selectedStudents.push({ student_id: studentId, student_name: studentName, phone_number: phoneNumber, marks });
+        updateStudentStatus(studentId, 'pending', '⏳ Sending...');
+      });
+
+      // Send AJAX request
+      fetch('/send_sms/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ students: selectedStudents, exam_type: examTypeName })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          data.results.forEach(result => {
+            if (result.status === 'success') {
+              updateStudentStatus(result.student_id, 'success', '✅ Sent');
+            } else {
+              updateStudentStatus(result.student_id, 'failed', '❌ Failed');
+              console.error(SMS failed for ${result.student_name}: ${result.message});
+            }
+          });
+          const successCount = data.results.filter(r => r.status === 'success').length;
+          const failedCount  = data.results.filter(r => r.status === 'failed').length;
+          showAlert(SMS Results: ${successCount} sent successfully, ${failedCount} failed., failedCount === 0 ? "success" : "error");
+        } else {
+          showAlert(Error: ${data.error}, "error");
+          clearAllStatus();
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert("An error occurred while sending SMS. Please try again.", "error");
+        clearAllStatus();
+      })
+      .finally(() => {
+        this.disabled = false;
+        document.getElementById("loadingSpinner").style.display = "none";
+      });
+    });
+
+    // Helpers
+    function updateStudentStatus(studentId, status, text) {
+      const statusCell = document.getElementById(cell-${studentId});
+      const row = document.querySelector(tr[data-student-id="${studentId}"]);
+      if (statusCell) { statusCell.textContent = text; statusCell.className = status-cell status-${status}; }
+      if (row) { row.classList.remove('row-success', 'row-failed', 'row-pending'); row.classList.add(row-${status}); }
+    }
+
+    function clearAllStatus() {
+      document.querySelectorAll('.status-cell').forEach(el => { el.textContent = '-'; el.className = 'status-cell'; });
+      document.querySelectorAll('tbody tr').forEach(row => { row.classList.remove('row-success', 'row-failed', 'row-pending'); });
+    }
+
+    function showAlert(message, type) {
+      const alertElement = type === "success" ? document.getElementById("alertSuccess") : document.getElementById("alertError");
+      alertElement.textContent = message;
+      alertElement.style.display = "block";
+      setTimeout(() => { alertElement.style.display = "none"; }, 5000);
+    }
+
+    function downloadTableAsCSV() {
+      const table = document.getElementById("marksTable");
+      if (!table) { alert("Table not found!"); return; }
+      const rows = Array.from(table.querySelectorAll("tr"));
+      const csv = rows.map(row => {
+        const cols = Array.from(row.querySelectorAll("th, td"))
+          .filter(col => !col.querySelector("input[type='checkbox']"))
+          .map(col => "${col.innerText.replace(/\n/g, " ").replace(/"/g, '""')}");
+        return cols.join(",");
+      }).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.setAttribute("hidden", ""); a.setAttribute("href", url); a.setAttribute("download", "student_data.csv");
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    /* spinner animation keyframes */
+    const style = document.createElement('style');
+    style.textContent = '@keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }';
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

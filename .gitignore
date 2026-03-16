@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.env
+*.env
+*.sql
+venv/git add .
+git commit -m "Initial clean commit of GRIET Automated Result Portal"
+
+.env
+*.env
+Cap_Project_05.env.backup
+__pycache__/
+*.pyc
+*.sql
+venv/
+db.sqlite3
+
